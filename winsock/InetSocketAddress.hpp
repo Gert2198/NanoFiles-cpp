@@ -6,6 +6,7 @@ class InetSocketAddress {
 public:
     // Constructor que acepta una InetAddress y un puerto
     InetSocketAddress(const InetAddress& inetAddress, unsigned short port);
+    InetSocketAddress(unsigned short port);
 
     // Obtener la dirección encapsulada como InetAddress
     InetAddress getAddress() const;

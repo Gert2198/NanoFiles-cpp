@@ -48,7 +48,6 @@ void NFController::setCurrentCommandArguments(std::vector<std::string> args) {
 }
 
 NFController::NFController() {
-    // controllerPeer = NFControllerLogicP2P();
     // Estado inicial del autómata
     currentState = LOGGED_OUT;
 }
@@ -58,20 +57,20 @@ void NFController::processCommand() {
     if (!canProcessCommandInCurrentState()) 
         return;
     /*
-        * En función del comando, invocar los métodos adecuados de NFControllerLogicDir
-        * y NFControllerLogicP2P, ya que son estas dos clases las que implementan
-        * realmente la lógica de cada comando y procesan la información recibida
-        * mediante la comunicación con el directorio u otros pares de NanoFiles
-        * (imprimir por pantalla el resultado de la acción y los datos recibidos,
-        * etc.).
-        */
+    * En función del comando, invocar los métodos adecuados de NFControllerLogicDir
+    * y NFControllerLogicP2P, ya que son estas dos clases las que implementan
+    * realmente la lógica de cada comando y procesan la información recibida
+    * mediante la comunicación con el directorio u otros pares de NanoFiles
+    * (imprimir por pantalla el resultado de la acción y los datos recibidos,
+    * etc.).
+    */
     bool commandSucceeded = false;
 
     switch(currentCommand) {
     case NFCommands::COM_MYFILES: 
         showMyLocalFiles(); // Muestra los ficheros en el directorio local compartido
         break;
-    case NFCommands::COM_LOGIN:
+    case NFCommands::COM_LOGIN: {
         if (NanoFiles::testMode) {
             try {
                 controllerDir.testCommunicationWithDirectory(directory);
@@ -87,27 +86,29 @@ void NFController::processCommand() {
         */
         commandSucceeded = controllerDir.doLogin(directory, nickname);
         break;
-    case NFCommands::COM_LOGOUT: 
+    }
+    case NFCommands::COM_LOGOUT: {
         /*
         * Pedir al controllerDir que "cierre sesión" en el directorio para dar de baja
         * el nombre de usuario registrado (método doLogout).
         */
-        // TODO
-        // if (controllerPeer.bgFileServer != null) {
-        // 	System.err.println("*Error: cannot logout while serving, please stop the server");
-        // 	commandSucceeded = false;
-        // } else {
+        if (controllerPeer.bgFileServer) {
+        	std::cerr << "*Error: cannot logout while serving, please stop the server" << std::endl;
+        	commandSucceeded = false;
+        } else {
             commandSucceeded = controllerDir.doLogout();
-        // }
+        }
         break;
-    case NFCommands::COM_USERLIST:
+    }
+    case NFCommands::COM_USERLIST: {
         /*
         * Pedir al controllerDir que obtenga del directorio la lista de nicknames
         * registrados, y la muestre por pantalla (método getAndPrintUserList)
         */
         commandSucceeded = controllerDir.getAndPrintUserList();
         break;
-    case NFCommands::COM_FILELIST:
+    }
+    case NFCommands::COM_FILELIST: {
         /*
         * Pedir al controllerDir que obtenga del directorio la lista de ficheros que
         * hay publicados (los ficheros que otros peers están sirviendo), y la imprima
@@ -115,14 +116,16 @@ void NFController::processCommand() {
         */
         commandSucceeded = controllerDir.getAndPrintFileList();
         break;
-    case NFCommands::COM_FGSERVE:
+    }
+    case NFCommands::COM_FGSERVE: {
         /*
         * Pedir al controllerPeer que lance un servidor de ficheros en primer plano
         * (método foregroundServeFiles). Este método no retorna...
         */
-        // controllerPeer.foregroundServeFiles();               TODO
+        controllerPeer.foregroundServeFiles();
         break;
-    case NFCommands::COM_PUBLISH:
+    }
+    case NFCommands::COM_PUBLISH: {
         /*
         * Pedir al controllerDir que publique en el directorio nuestra lista de
         * ficheros disponibles (NanoFiles.db) para ser descargados desde otros peers
@@ -130,7 +133,8 @@ void NFController::processCommand() {
         */
         commandSucceeded = controllerDir.publishLocalFiles();
         break;
-    case NFCommands::COM_BGSERVE:
+    }
+    case NFCommands::COM_BGSERVE: {
         /*
         * Pedir al controllerPeer que lance un servidor en segundo plano. A
         * continuación (método backgroundServeFiles). Si el servidor se ha podido
@@ -138,23 +142,23 @@ void NFController::processCommand() {
         * ficheros en el directorio, indicando el puerto en el que nuestro servidor
         * escucha conexiones de otros peers (método registerFileServer).
         */
-        // bool serverRunning = controllerPeer.backgroundServeFiles();       TODO
-        // if (serverRunning) {
-        // 	commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort());
-        // }
+        bool serverRunning = controllerPeer.backgroundServeFiles();
+        if (serverRunning) 
+        	commandSucceeded = controllerDir.registerFileServer(controllerPeer.getServerPort());
         break;
-    case NFCommands::COM_STOP_SERVER:
+    }
+    case NFCommands::COM_STOP_SERVER: {
         /*
         * Pedir al controllerPeer que pare el servidor en segundo plano (método método
         * stopBackgroundFileServer). A continuación, pedir al controllerDir que
         * solicite al directorio darnos de baja como servidor de ficheros (método
         * unregisterFileServer).
         */
-        // TODO
-        // controllerPeer.stopBackgroundFileServer();
-        // commandSucceeded = controllerDir.unregisterFileServer();
+        controllerPeer.stopBackgroundFileServer();
+        commandSucceeded = controllerDir.unregisterFileServer();
         break;
-    case NFCommands::COM_DOWNLOADFROM:
+    }
+    case NFCommands::COM_DOWNLOADFROM: {
         /*
         * Pedir al controllerDir que obtenga del directorio la dirección de socket (IP
         * y puerto) del servidor cuyo nickname indica el atributo downloadTargetServer
@@ -165,11 +169,14 @@ void NFController::processCommand() {
         * al comando) y lo guarde con el nombre indicado en downloadLocalFileName (3er
         * argumento)
         */
-        // TODO
-        // auto serverAddr = controllerDir.getServerAddress(downloadTargetServer);
-        // commandSucceeded = controllerPeer.downloadFileFromSingleServer(serverAddr, downloadTargetFileHash, downloadLocalFileName);
+        auto serverAddr = controllerDir.getServerAddress(downloadTargetServer);
+        if (!serverAddr.first) {
+            std::cerr << "* Cannot start download - No server address provided" << std::endl;
+			commandSucceeded = false;
+        } else commandSucceeded = controllerPeer.downloadFileFromSingleServer(serverAddr.second, downloadTargetFileHash, downloadLocalFileName);
         break;
-    case NFCommands::COM_SEARCH:
+    }
+    case NFCommands::COM_SEARCH: {
         /*
         * Pedir al controllerDir que obtenga del directorio y muestre los servidores
         * que tienen disponible el fichero identificado por dicho hash (puede ser una
@@ -177,7 +184,8 @@ void NFController::processCommand() {
         */
         commandSucceeded = controllerDir.getAndPrintServersNicknamesSharingThisFile(downloadTargetFileHash);
         break;
-    case NFCommands::COM_DOWNLOAD:
+    }
+    case NFCommands::COM_DOWNLOAD: {
         /*
         * Pedir al controllerDir que obtenga del directorio la lista de nicknames de
         * servidores que comparten el fichero indicado en downloadTargetFileHash (1er
@@ -186,11 +194,11 @@ void NFController::processCommand() {
         * servidores obtenidos, y lo guarde con el nombre indicado en
         * downloadLocalFileName (2º argumento)
         */
-        // TODO
-        // auto serverAddressList = controllerDir.getServerAddressesSharingThisFile(downloadTargetFileHash);
-        // commandSucceeded = controllerPeer.downloadFileFromMultipleServers(serverAddressList.second, downloadTargetFileHash, downloadLocalFileName);
+        auto serverAddressList = controllerDir.getServerAddressesSharingThisFile(downloadTargetFileHash);
+        commandSucceeded = controllerPeer.downloadFileFromMultipleServers(serverAddressList.second, downloadTargetFileHash, downloadLocalFileName);
         break;
-    case NFCommands::COM_QUIT:
+    }
+    case NFCommands::COM_QUIT: 
     default:
         break;
     }

@@ -19,4 +19,6 @@ public:
     static bool ichar_equals(char a, char b);
 
     static bool iequals(const std::string& a, const std::string& b);
+
+    static void toLower(std::string& str);
 };

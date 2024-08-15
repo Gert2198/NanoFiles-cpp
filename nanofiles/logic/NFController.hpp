@@ -2,6 +2,7 @@
 
 #include "shell/NFShell.hpp"
 #include "NFControllerLogicDir.hpp"
+#include "NFControllerLogicP2P.hpp"
 
 class NFController {
 private:
@@ -28,7 +29,7 @@ private:
 	 * Objeto controlador encargado de la comunicación con otros peers (como
 	 * servidor o cliente)
 	 */
-	// NFControllerLogicP2P controllerPeer;
+	NFControllerLogicP2P controllerPeer;
 
 	/**
 	 * El estado en que se encuentra este peer (según el autómata). El estado debe

@@ -42,3 +42,7 @@ bool StringUtils::ichar_equals(char a, char b) {
 bool StringUtils::iequals(const std::string& a, const std::string& b) {
     return std::equal(a.begin(), a.end(), b.begin(), b.end(), ichar_equals);
 }
+
+void StringUtils::toLower(std::string& str) {
+    std::transform(str.begin(), str.end(), str.begin(), [](unsigned char c){ return std::tolower(c); });
+}

@@ -73,6 +73,13 @@ std::map<std::string, FileInfo> FileInfo::loadFileMapFromFolder(const fs::direct
     return files;
 }
 
+std::vector<char> FileInfo::readFile(const std::string& file_name) {
+    std::vector<char> result;
+    std::ifstream file(file_name);
+    std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), std::back_inserter(result));
+    return result;
+}
+
 bool FileInfo::canRead(const fs::path& p) {
     std::error_code ec; // For noexcept overload usage.
     auto perms = fs::status(p, ec).permissions();

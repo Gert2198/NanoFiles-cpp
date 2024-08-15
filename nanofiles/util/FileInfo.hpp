@@ -1,6 +1,8 @@
 #pragma once
 
 #include <map>
+#include <fstream>
+#include <iterator>
 #include <filesystem>
 namespace fs = std::filesystem;
 
@@ -40,6 +42,8 @@ public:
 	 *         in the given folder and its subdirectories.
 	 */
 	static std::map<std::string, FileInfo> loadFileMapFromFolder(const fs::directory_entry folder);
+
+	static std::vector<char> readFile(const std::string& file_name);
 
 
 	bool operator<(const FileInfo& other) const {
