@@ -16,27 +16,27 @@ void NFServer::run() {
         return;
     }
 
-    std::unique_ptr<SOCKET> socket = nullptr;
+    SOCKET socket;
     while (!stop.load()) {
         try {
-            socket = std::make_unique<SOCKET>(serverSocket->accept());
+            socket = serverSocket->accept();
             std::cout << "\nNew client connected" << std::endl;
         } catch (const SocketTimeoutException& e1) {
             continue;
         } catch (const std::exception& e2) {
-            std::cerr << "*Error: There was a problem with the local file server running on " 
-                << serverSocket->getLocalAddress().toString() << ":" << serverSocket->getLocalPort() << std::endl;
+            if (!serverSocket) std::cerr << "*Error: server socket is null" << std::endl;
+            std::cerr << "*Error: There was a problem with the local file server running on " << serverSocket->getLocalAddress().toString() << ":" << serverSocket->getLocalPort() << std::endl;
         }
 
-        if (socket && *socket != INVALID_SOCKET) {
-            NFServerThread connectionThread(*socket);
+        if (socket != INVALID_SOCKET) {
+            NFServerThread connectionThread(socket);
             connectionThread.start();
         }
     }
 
     if (socket) {
         try {
-            closesocket(*socket);
+            closesocket(socket);
         } catch (const std::exception e) {
             std::cerr << "*Error: failed closing Bgserve's client socket" << std::endl;
         }
@@ -54,13 +54,12 @@ void NFServer::run() {
 
 void NFServer::startServer() {
     serverThread = std::thread(&NFServer::run, this);
-    serverThread.detach();
 }
 
 void NFServer::stopServer() {
     stop.store(true);
     if (serverThread.joinable()) serverThread.join();
-    serverSocket->close();
+    else std::cerr << "*Error: thread not joinable" << std::endl;
 }
 
 int NFServer::getPort() const {

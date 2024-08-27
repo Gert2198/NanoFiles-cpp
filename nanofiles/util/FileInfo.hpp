@@ -1,5 +1,7 @@
 #pragma once
 
+#include <windows.h>
+
 #include <map>
 #include <fstream>
 #include <iterator>
@@ -7,6 +9,7 @@
 namespace fs = std::filesystem;
 
 #include "FileDigest.hpp"
+#include "StringUtils.hpp"
 
 class FileInfo {
 public:
@@ -41,10 +44,13 @@ public:
 	 * @return A map of the metadata (FileInfo) of all the files recursively found
 	 *         in the given folder and its subdirectories.
 	 */
-	static std::map<std::string, FileInfo> loadFileMapFromFolder(const fs::directory_entry folder);
+	static std::map<std::string, FileInfo> loadFileMapFromFolder(const fs::directory_entry& folder);
 
 	static std::vector<char> readFile(const std::string& file_name);
 
+	static bool fileExists(const std::string& filename);
+
+	static std::string getAbsolutePath(const std::string& relative_path);
 
 	bool operator<(const FileInfo& other) const {
         // Primero comparar por ruta
@@ -61,5 +67,5 @@ public:
 
 private:
     static bool canRead(const fs::path& p);
-	static void scanFolderRecursive(const fs::directory_entry folder, std::map<std::string, FileInfo> files);	
+	static void scanFolderRecursive(const fs::directory_entry& folder, std::map<std::string, FileInfo>& files);	
 };

@@ -3,14 +3,8 @@
 #include <exception>
 #include <string>
 
-class SocketTimeoutException : public std::exception {
+class SocketTimeoutException : public std::runtime_error {
 public:
-    SocketTimeoutException(const std::string& message) : msg(message) {}
-
-    const char* what() const noexcept override {
-        return msg.c_str();
-    }
-
-private:
-    std::string msg;
+    SocketTimeoutException(const std::string& message)
+        : std::runtime_error(message) {}
 };

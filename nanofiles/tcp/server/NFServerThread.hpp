@@ -2,8 +2,8 @@
 
 #include <thread>
 #include <utility>  // Para std::move
-#include "ServerSocket.hpp"  // Suponiendo que ServerSocket y otros necesarios están definidos
-#include "NFServerComm.hpp"  // Suponiendo que esta clase está implementada
+#include "ServerSocket.hpp"
+#include "NFServerComm.hpp"
 
 class NFServerThread {
 private:

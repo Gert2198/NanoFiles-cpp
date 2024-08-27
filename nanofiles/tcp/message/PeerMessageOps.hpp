@@ -49,18 +49,10 @@ public:
     /**
 	 * Transforma una cadena en el opcode correspondiente
 	 */
-	static std::pair<bool, unsigned char> operationToOpcode(std::string opStr) {
-        StringUtils::toLower(opStr);
-        if (_operation_to_opcode.find(opStr) == _operation_to_opcode.end()) return {false, 0};
-		return {true, _operation_to_opcode[opStr]};
-	}
+	static std::pair<bool, unsigned char> operationToOpcode(std::string opStr);
 
 	/**
 	 * Transforma un opcode en la cadena correspondiente
 	 */
-	static std::pair<bool, std::string> opcodeToOperation(unsigned char opcode) {
-        if (_opcode_to_operation.find(opcode) == _opcode_to_operation.end()) return {false, ""};
-		return {true, _opcode_to_operation[opcode]};
-	}
-
+	static std::pair<bool, std::string> opcodeToOperation(unsigned char opcode);
 };

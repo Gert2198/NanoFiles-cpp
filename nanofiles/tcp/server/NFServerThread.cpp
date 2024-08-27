@@ -6,7 +6,7 @@ void NFServerThread::run() {
 
 // Constructor que toma el socket del cliente
 NFServerThread::NFServerThread(SOCKET clientSocket) 
-    : clientSocket(clientSocket), thread(&NFServerThread::run, this) {}
+    : clientSocket(clientSocket) {}
 
 // Permitir movimiento
 NFServerThread::NFServerThread(NFServerThread&& other) noexcept
@@ -26,5 +26,5 @@ NFServerThread& NFServerThread::operator=(NFServerThread&& other) noexcept
 }
 
 void NFServerThread::start() {
-    thread.detach();
+    thread = std::thread(&NFServerThread::run, this);
 }

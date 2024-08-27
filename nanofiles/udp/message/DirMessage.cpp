@@ -21,7 +21,7 @@ std::string DirMessage::getNickname() {
     return nickname;
 }
 void DirMessage::setNickname(std::string nick) {
-    assert(operation == DirMessageOps::OPERATION_LOGIN);
+    assert(operation == DirMessageOps::OPERATION_LOGIN || operation == DirMessageOps::OPERATION_GET_ADDRESS);
     this->nickname = nick;
 }
 
@@ -40,8 +40,16 @@ void DirMessage::setSessionKey(std::string sessionKey) {
 std::map<std::string, bool> DirMessage::getUserlist() {
     std::map<std::string, bool> mapa;
     std::vector<std::string> lista = StringUtils::split(userlist, LIST_DELIMITER);
+
+    auto it = lista.begin();
+    while (it != lista.end()) {
+        if (it->empty()) lista.erase(it);
+        else it++;
+    }
+
     for (std::string line : lista) {
         int idx = line.find(INSIDE_DELIMITER);
+        if (idx == std::string::npos) continue;
         std::string nickname = line.substr(0, idx);
         std::string serving = line.substr(idx + 1);
         bool isServing = serving == "1" ? true : false;
@@ -64,15 +72,20 @@ std::pair<bool, std::vector<FileInfo>> DirMessage::getFiles() {
     if (files.find(LIST_DELIMITER) == std::string::npos) return {false, {}};
     std::vector<std::string> lista = StringUtils::split(files, LIST_DELIMITER);
     
+    auto it = lista.begin();
+    while (it != lista.end()) {
+        if (it->empty()) lista.erase(it);
+        else it++;
+    }
+
     std::vector<FileInfo> ficheros(lista.size());
     for (int i = 0; i < lista.size(); i++) {
-        ficheros[i] = FileInfo();
-        
         std::string cadena(lista[i]);
+        if (cadena.empty()) continue;
         std::vector<std::string> aux = StringUtils::split(cadena, INSIDE_DELIMITER);
         
         ficheros[i].fileName = aux[0];
-        ficheros[i].fileSize = std::stoi(aux[1]);
+        ficheros[i].fileSize = std::stol(aux[1]);
         ficheros[i].fileHash = aux[2];
     }
     return {true, ficheros};
@@ -96,6 +109,13 @@ bool DirMessage::setFiles(std::vector<FileInfo> files) {
 std::map<std::string, std::list<std::string>> DirMessage::getUsersPerFile() {
     std::map<std::string, std::list<std::string>> mapa;
     std::vector<std::string> lista = StringUtils::split(usersPerFile, LIST_DELIMITER);
+
+    auto it = lista.begin();
+    while (it != lista.end()) {
+        if (it->empty()) lista.erase(it);
+        else it++;
+    }
+
     for (std::string line : lista) {
         int idx = line.find(INSIDE_DELIMITER);
         std::string hash = line.substr(0, idx);

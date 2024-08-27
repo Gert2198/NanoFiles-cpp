@@ -1,0 +1,34 @@
+#include "NFServerSimple.hpp"
+
+NFServerSimple::NFServerSimple() { // throws IOException
+    InetSocketAddress serverAddress(PORT);
+    serverSocket->bind(serverAddress);
+    serverSocket->setReuseAddress(true); // para volver a poder usar el puerto en cuanto se termine la conexion
+}
+
+/**
+ * Método para ejecutar el servidor de ficheros en primer plano. Sólo es capaz
+ * de atender una conexión de un cliente. Una vez se lanza, ya no es posible
+ * interactuar con la aplicación a menos que se implemente la funcionalidad de
+ * detectar el comando STOP_SERVER_COMMAND (opcional)
+ * 
+ */
+void NFServerSimple::run() {
+    if (serverSocket == nullptr) {
+        std::cerr << "*Error: Failed to run the file server, server socket not bound to any address" << std::endl;
+    }
+    
+    std::unique_ptr<SOCKET> socket;
+    boolean stopServer = false;
+    while (!stopServer) {
+        try {
+            socket = std::make_unique<SOCKET>(serverSocket->accept());
+        } catch (const std::exception& e) {
+            socket = nullptr;
+            std::cerr << "*Error: Problem accepting a connection" << std::endl;
+        }
+        if (socket) NFServerComm::serveFilesToClient(*socket);
+    }
+    
+    std::cout << "NFServerSimple stopped. Returning to the nanoFiles shell..." << std::endl;
+}

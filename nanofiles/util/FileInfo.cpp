@@ -67,7 +67,7 @@ std::vector<FileInfo> FileInfo::lookupHashSubstring(std::vector<FileInfo> files,
     return matchingFiles;
 }
 
-std::map<std::string, FileInfo> FileInfo::loadFileMapFromFolder(const fs::directory_entry folder) {
+std::map<std::string, FileInfo> FileInfo::loadFileMapFromFolder(const fs::directory_entry& folder) {
     std::map<std::string, FileInfo> files;
     scanFolderRecursive(folder, files);
     return files;
@@ -78,6 +78,20 @@ std::vector<char> FileInfo::readFile(const std::string& file_name) {
     std::ifstream file(file_name);
     std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), std::back_inserter(result));
     return result;
+}
+
+bool FileInfo::fileExists(const std::string& filename) {
+    std::ifstream file(filename);
+    return file.is_open();  
+}
+
+std::string FileInfo::getAbsolutePath(const std::string& relative_path) {
+    char absolute_path[MAX_PATH];
+    if (GetFullPathNameA(relative_path.c_str(), MAX_PATH, absolute_path, nullptr)) {
+        return std::string(absolute_path);
+    } else {
+        return std::string(); // Devuelve una cadena vacía si no se puede resolver la ruta
+    }
 }
 
 bool FileInfo::canRead(const fs::path& p) {
@@ -92,7 +106,7 @@ bool FileInfo::canRead(const fs::path& p) {
     return false;
 }
 
-void FileInfo::scanFolderRecursive(const fs::directory_entry folder, std::map<std::string, FileInfo> files) {
+void FileInfo::scanFolderRecursive(const fs::directory_entry& folder, std::map<std::string, FileInfo>& files) {
     if (!folder.exists()) {
         std::cerr << "scanFolder cannot find folder " << folder.path() << std::endl;
         return;

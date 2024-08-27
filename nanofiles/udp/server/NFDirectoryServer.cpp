@@ -128,11 +128,11 @@ DirMessage NFDirectoryServer::buildResponseFromRequest(DirMessage msg, InetSocke
             } else {
                 std::pair<bool, std::vector<FileInfo>> files = msg.getFiles();
                 for (FileInfo file : files.second) {
-                    if (std::find(filesPerUser[nick].begin(), filesPerUser[nick].end(), file) != filesPerUser[nick].end())
+                    if (std::find(filesPerUser[nick].begin(), filesPerUser[nick].end(), file) == filesPerUser[nick].end())
                         filesPerUser[nick].push_back(file);
                     if (usersPerFile.find(file) == usersPerFile.end()) 
                         usersPerFile[file] = std::list<std::string>();
-                    if (std::find(usersPerFile[file].begin(), usersPerFile[file].end(), nick) != usersPerFile[file].end())
+                    if (std::find(usersPerFile[file].begin(), usersPerFile[file].end(), nick) == usersPerFile[file].end())
                         usersPerFile[file].push_back(nick);
                 }
                 response = std::make_unique<DirMessage>(DirMessageOps::OPERATION_PUBLISH_OK);
@@ -152,7 +152,7 @@ DirMessage NFDirectoryServer::buildResponseFromRequest(DirMessage msg, InetSocke
             if (it != servers.end()) {
                 response = std::make_unique<DirMessage>(DirMessageOps::OPERATION_GET_ADDRESS_OK);
                 response->setIp(it->second.getAddress().toString());
-                response->setPort("" + it->second.getPort());
+                response->setPort(std::to_string(it->second.getPort()));
             } else 
                 response = std::make_unique<DirMessage>(DirMessageOps::OPERATION_GET_ADDRESS_FAIL);
         } else {

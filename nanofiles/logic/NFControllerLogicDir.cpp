@@ -57,8 +57,8 @@ bool NFControllerLogicDir::getAndPrintUserList() {
     
     result = true;
     for (auto user : userlist.second) {
-        std::cout << "User: " + user.first << std::endl;
-        std::cout << "\tServing: " + user.second << std::endl;
+        std::cout << "User: " << user.first << std::endl;
+        std::cout << "\tServing: " << user.second << std::endl;
     }
     return result;
 }

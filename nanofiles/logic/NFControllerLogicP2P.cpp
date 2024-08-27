@@ -1,5 +1,8 @@
 #include "NFControllerLogicP2P.hpp"
 
+#include "tcp/client/NFConnector.hpp"
+#include "tcp/server/NFServerSimple.hpp"
+
 NFControllerLogicP2P::NFControllerLogicP2P() : bgFileServer(nullptr) {}
 
 void NFControllerLogicP2P::foregroundServeFiles() {
@@ -52,20 +55,22 @@ bool NFControllerLogicP2P::downloadFileFromSingleServer(InetSocketAddress fserve
         return false;
     }
     
-    File f = new File(NanoFiles.DEFAULT_SHARED_DIRNAME + "/" + localFileName);
-    if (f.exists()) {
+    std::string filePath = NanoFiles::DEFAULT_SHARED_DIRNAME + "/" + localFileName;
+    if (FileInfo::fileExists(filePath)) {
         std::cerr << "*Error: The destination file already exists" << std::endl;
+        return false;
     }
-    
+
+    std::fstream f(filePath, std::ios::app | std::ios::in | std::ios::out | std::ios::binary);
     try {
-        result = nfConnector->downloadFile(targetFileHash, f);
+        result = nfConnector->downloadFile(targetFileHash, f, filePath);
     } catch (const std::exception& e) {
-        std::cout << "*Error: IOException while downloading the file" << std::endl;
+        std::cout << "*Error: exception occurred while downloading the file" << std::endl;
     }
     if (result) {
         std::cout << "The file has been downloaded successfully" << std::endl;
     } else {
-        std::cerr << "*Error: It is not possible to download the file" << std::endl;
+        std::cerr << "*Error: It was not possible to download the file" << std::endl;
     }
     nfConnector->disconnect();
 
