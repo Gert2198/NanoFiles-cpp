@@ -107,7 +107,7 @@ public:
         return bound;
     }
 
-    int getLocalPort() const {
+    unsigned short getLocalPort() const {
         if (!bound) return 0; 
 
         sockaddr_in addr = {};
