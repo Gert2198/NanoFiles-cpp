@@ -173,7 +173,11 @@ void NFController::processCommand() {
         if (!serverAddr.first) {
             std::cerr << "* Cannot start download - No server address provided" << std::endl;
 			commandSucceeded = false;
-        } else commandSucceeded = controllerPeer.downloadFileFromSingleServer(serverAddr.second, downloadTargetFileHash, downloadLocalFileName);
+        } else {
+            std::cout << "Trying to connect to server with IP " << serverAddr.second.getAddress().toString() 
+                << ", port " << serverAddr.second.getPort() << std::endl;
+            commandSucceeded = controllerPeer.downloadFileFromSingleServer(serverAddr.second, downloadTargetFileHash, downloadLocalFileName);
+        }
         break;
     }
     case NFCommands::COM_SEARCH: {

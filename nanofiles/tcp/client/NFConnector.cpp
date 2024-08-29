@@ -9,11 +9,12 @@ NFConnector::NFConnector(InetSocketAddress fserverAddr) : serverAddr(fserverAddr
 
     sockaddr_in addr = serverAddr.getSocketAddress();
 
-    if (::bind(serverSocket, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
+    if (::connect(serverSocket, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
+        int error = WSAGetLastError();
         closesocket(serverSocket);
-        throw std::runtime_error("Bind failed with error: " + std::to_string(WSAGetLastError()));
+        throw std::runtime_error("Bind failed with error: " + std::to_string(error));
     }
-    std::cout << "Connected to..." << serverAddr.getAddress().toString() << ":" << serverAddr.getPort() << std::endl;
+    std::cout << "Connecting to " << serverAddr.toString() << std::endl;
     
     socketManager = std::make_unique<SocketManager>(serverSocket);
 }
