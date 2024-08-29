@@ -34,7 +34,7 @@ void NFServer::run() {
         }
     }
 
-    if (socket) {
+    if (socket != INVALID_SOCKET) {
         try {
             closesocket(socket);
         } catch (const std::exception e) {

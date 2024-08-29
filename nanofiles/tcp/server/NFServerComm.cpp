@@ -14,6 +14,7 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
         if (bytesReceived == SOCKET_ERROR) {
             std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
             closesocket(clientSocket);
+            clientSocket = INVALID_SOCKET;
             return;
         }
 
@@ -32,16 +33,19 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_FILE_NOT_FOUND);
                 messageToSend.writeMessageToOutputStream(clientManager); 
                 closesocket(clientSocket);
+                clientSocket = INVALID_SOCKET;
                 return;
             } else if (posibles.size() > 1) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_AMBIGUOUS_HASH);
                 messageToSend.writeMessageToOutputStream(clientManager); 
                 closesocket(clientSocket);
+                clientSocket = INVALID_SOCKET;
                 return;
             } else ficheroADescargar = posibles[0];
         } else {
             std::cerr << "*Error: Unexpected operation from client. Closing connection" << std::endl;
             closesocket(clientSocket);
+            clientSocket = INVALID_SOCKET;
             return;
         }
         
@@ -69,6 +73,7 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
         messageToSend.writeMessageToOutputStream(clientManager); 
         
         closesocket(clientSocket); 
+        clientSocket = INVALID_SOCKET;
         
     } catch (const std::exception& e) { 
         std::cerr << "*Error: Something went wrong in P2P connection, " << e.what() << std::endl;
