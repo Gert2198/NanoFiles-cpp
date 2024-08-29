@@ -2,7 +2,8 @@
 
 NFServerSimple::NFServerSimple() { // throws IOException
     InetSocketAddress serverAddress(PORT);
-    serverSocket->bind(serverAddress);
+
+    serverSocket = std::make_unique<ServerSocket>(serverAddress); 
     serverSocket->setReuseAddress(true); // para volver a poder usar el puerto en cuanto se termine la conexion
 }
 
