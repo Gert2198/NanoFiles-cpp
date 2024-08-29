@@ -19,16 +19,16 @@ void NFServerSimple::run() {
         std::cerr << "*Error: Failed to run the file server, server socket not bound to any address" << std::endl;
     }
     
-    std::unique_ptr<SOCKET> socket;
     boolean stopServer = false;
     while (!stopServer) {
         try {
-            socket = std::make_unique<SOCKET>(serverSocket->accept());
+            SOCKET socket = serverSocket->accept();
+            if (socket != INVALID_SOCKET) NFServerComm::serveFilesToClient(socket);
+        } catch (const SocketTimeoutException& e1) {
+            continue;
         } catch (const std::exception& e) {
-            socket = nullptr;
             std::cerr << "*Error: Problem accepting a connection" << std::endl;
         }
-        if (socket) NFServerComm::serveFilesToClient(*socket);
     }
     
     std::cout << "NFServerSimple stopped. Returning to the nanoFiles shell..." << std::endl;
