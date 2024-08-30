@@ -2,25 +2,11 @@
 
 #include "util/SocketManager.hpp"
 
-void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
+void NFServerComm::serveFilesToClient(SOCKET clientSocket, SOCKET serverSocket) {
     try {
-        char buf[32768];
-        int bytesReceived;
-        std::stringstream streamBufferIn;
-
-        while ((bytesReceived = recv(clientSocket, buf, sizeof(buf), 0)) > 0) 
-            streamBufferIn.write(buf, bytesReceived);
-
-        if (bytesReceived == SOCKET_ERROR) {
-            std::cerr << "recv failed with error: " << WSAGetLastError() << std::endl;
-            closesocket(clientSocket);
-            clientSocket = INVALID_SOCKET;
-            return;
-        }
-
-        SocketManager clientManager(clientSocket);
+        SocketManager serverSocketManager(serverSocket);
         
-        PeerMessage received = PeerMessage::readMessageFromInputStream(clientManager);
+        PeerMessage received = PeerMessage::readMessageFromInputStream(serverSocketManager);
         PeerMessage messageToSend;
         
         int opcode = received.getOpcode();
@@ -31,13 +17,13 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
             std::vector<FileInfo> posibles = FileInfo::lookupHashSubstring(files, received.getFileHash());
             if (posibles.size() == 0) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_FILE_NOT_FOUND);
-                messageToSend.writeMessageToOutputStream(clientManager); 
+                messageToSend.writeMessageToOutputStream(serverSocketManager); 
                 closesocket(clientSocket);
                 clientSocket = INVALID_SOCKET;
                 return;
             } else if (posibles.size() > 1) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_AMBIGUOUS_HASH);
-                messageToSend.writeMessageToOutputStream(clientManager); 
+                messageToSend.writeMessageToOutputStream(serverSocketManager); 
                 closesocket(clientSocket);
                 clientSocket = INVALID_SOCKET;
                 return;
@@ -58,19 +44,19 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
         for (int i = 0; i < numVeces; i++) {
             std::vector<char> minipart(it, it + 32*1024 - 1);
             messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, 32*1024, minipart);
-            messageToSend.writeMessageToOutputStream(clientManager); 
+            messageToSend.writeMessageToOutputStream(serverSocketManager); 
             it += 32*1024;
         }
         // ultimo mensaje con los bytes restantes por leer
         std::vector<char> minipart(it, bytes.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, bytesRestantes, minipart);
-        messageToSend.writeMessageToOutputStream(clientManager); 
+        messageToSend.writeMessageToOutputStream(serverSocketManager); 
         
         // ultimo mensaje indicando que es el final
         std::string filehash = ficheroADescargar.fileHash;
         std::vector<char> vectorHash(filehash.begin(), filehash.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, true, vectorHash.size(), vectorHash);
-        messageToSend.writeMessageToOutputStream(clientManager); 
+        messageToSend.writeMessageToOutputStream(serverSocketManager); 
         
         closesocket(clientSocket); 
         clientSocket = INVALID_SOCKET;

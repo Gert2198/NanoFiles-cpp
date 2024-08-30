@@ -17,12 +17,12 @@
 
 class NFConnector {
 private:
-    ServerSocket serverSocket;
-    std::unique_ptr<SocketManager> serverSocketManager;
+    InetSocketAddress serverAddress;
+    SOCKET clientSocket;
 public:
     NFConnector(InetSocketAddress fserverAddr); // throws UnknownHostException, IOException
 
     bool downloadFile(const std::string& targetFileHashSubstr, std::fstream& file, const std::string& filePath); // throws IOException
-	void disconnect();
+	// void disconnect();
 	InetSocketAddress getServerAddr();
 };

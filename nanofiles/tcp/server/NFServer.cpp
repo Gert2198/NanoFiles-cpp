@@ -16,10 +16,10 @@ void NFServer::run() {
         return;
     }
 
-    SOCKET socket;
+    SOCKET clientSocket;
     while (!stop.load()) {
         try {
-            socket = serverSocket->accept();
+            clientSocket = serverSocket->accept();
             std::cout << "\nNew client connected" << std::endl;
         } catch (const SocketTimeoutException& e1) {
             continue;
@@ -28,15 +28,15 @@ void NFServer::run() {
             std::cerr << "*Error: There was a problem with the local file server running on " << serverSocket->getLocalAddress().toString() << ":" << serverSocket->getLocalPort() << std::endl;
         }
 
-        if (socket != INVALID_SOCKET) {
-            NFServerThread connectionThread(socket);
+        if (clientSocket != INVALID_SOCKET) {
+            NFServerThread connectionThread(clientSocket, serverSocket->getSocket());
             connectionThread.start();
         }
     }
 
-    if (socket != INVALID_SOCKET) {
+    if (clientSocket != INVALID_SOCKET) {
         try {
-            closesocket(socket);
+            closesocket(clientSocket);
         } catch (const std::exception e) {
             std::cerr << "*Error: failed closing Bgserve's client socket" << std::endl;
         }

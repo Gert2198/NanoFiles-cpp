@@ -68,11 +68,11 @@ bool NFControllerLogicP2P::downloadFileFromSingleServer(InetSocketAddress fserve
         std::cout << "*Error: exception occurred while downloading the file" << std::endl;
     }
     if (result) {
-        std::cout << "The file has been downloaded successfully" << std::endl;
+        std::cout << "File downloaded successfully" << std::endl;
     } else {
         std::cerr << "*Error: It was not possible to download the file" << std::endl;
     }
-    nfConnector->disconnect();
+    // nfConnector->disconnect();
 
     return result;
 }

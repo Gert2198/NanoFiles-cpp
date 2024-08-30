@@ -15,5 +15,5 @@
 
 class NFServerComm {
 public:
-    static void serveFilesToClient(SOCKET clientSocket);
+    static void serveFilesToClient(SOCKET clientSocket, SOCKET serverSocket);
 };

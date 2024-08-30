@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-NFConnector::NFConnector(InetSocketAddress fserverAddr) : serverSocket(fserverAddr) {
-    SOCKET clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+NFConnector::NFConnector(InetSocketAddress fserverAddr) : serverAddress(fserverAddr) {
+    clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (clientSocket == INVALID_SOCKET) 
         throw std::runtime_error("*Error al crear el socket: " + WSAGetLastError());
 
@@ -15,7 +15,7 @@ NFConnector::NFConnector(InetSocketAddress fserverAddr) : serverSocket(fserverAd
     if (bind(clientSocket, (sockaddr*)&clientAddr, sizeof(clientAddr)) == SOCKET_ERROR) {
         int error = WSAGetLastError();
         closesocket(clientSocket);
-        throw std::runtime_error("Bind failed with error: " + error);
+        throw std::runtime_error("Client socket bind failed with error: " + error);
     }
 
     sockaddr_in addr = fserverAddr.getSocketAddress();
@@ -25,8 +25,6 @@ NFConnector::NFConnector(InetSocketAddress fserverAddr) : serverSocket(fserverAd
         throw std::runtime_error("Error trying to connect to server socket: " + error);
     }
     std::cout << "Connecting to " << fserverAddr.toString() << std::endl;
-    
-    serverSocketManager = std::make_unique<SocketManager>(serverSocket.getSocket());
 }
 
 bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fstream& file, const std::string& filePath) { // throws IOException
@@ -37,12 +35,14 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
     * al servidor a través del "dos" del socket mediante el método
     * writeMessageToOutputStream.
     */
+    SocketManager clientSocketManager(clientSocket);
+
     PeerMessage send = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_REQUEST, (char)targetFileHashSubstr.length(), targetFileHashSubstr);
-    send.writeMessageToOutputStream(*serverSocketManager);
+    send.writeMessageToOutputStream(clientSocketManager);
 
     boolean end = false;
     
-    PeerMessage receive = PeerMessage::readMessageFromInputStream(*serverSocketManager);
+    PeerMessage receive = PeerMessage::readMessageFromInputStream(clientSocketManager);
     
     int operation = receive.getOpcode();
     switch (operation) {
@@ -74,7 +74,7 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
         auto partialFile = receive.getFile();
         file.write(partialFile.data(), partialFile.size());
         
-        receive = PeerMessage::readMessageFromInputStream(*serverSocketManager);
+        receive = PeerMessage::readMessageFromInputStream(clientSocketManager);
         if (receive.getOpcode() != PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE) {
             std::cerr << "*Error: something went wrong in the middle of the download" << std::endl;
             std::remove(filePath.c_str());
@@ -99,10 +99,10 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
     return downloaded;
 }
 
-void NFConnector::disconnect() {
-    serverSocket.close();
-}
+// void NFConnector::disconnect() {
+//     serverSocket.close();
+// }
 
 InetSocketAddress NFConnector::getServerAddr() {
-    return {serverSocket.getLocalAddress(), serverSocket.getLocalPort()};
+    return serverAddress;
 }
