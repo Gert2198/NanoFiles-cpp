@@ -23,7 +23,7 @@ void NFServerSimple::run() {
     while (!stopServer) {
         try {
             SOCKET clientSocket = serverSocket->accept();
-            if (clientSocket != INVALID_SOCKET) NFServerComm::serveFilesToClient(clientSocket, serverSocket->getSocket());
+            if (clientSocket != INVALID_SOCKET) NFServerComm::serveFilesToClient(clientSocket);
         } catch (const SocketTimeoutException& e1) {
             continue;
         } catch (const std::exception& e) {

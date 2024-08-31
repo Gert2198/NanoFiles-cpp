@@ -135,7 +135,7 @@ void PeerMessage::writeMessageToOutputStream(SocketManager dos) { // throws IOEx
 
         dos.writeByte((char)hashLenght);
         const char * hashValue = fileHash.c_str();
-        dos.write(hashValue);
+        dos.write(hashValue, hashLenght);
         break;
     }
     case PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE: {
