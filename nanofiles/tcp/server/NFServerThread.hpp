@@ -7,13 +7,13 @@
 
 class NFServerThread {
 private:
-    SOCKET clientSocket, serverSocket;
+    SOCKET clientSocket;
     std::thread thread;
 
     void run();
 public:
     // Constructor que toma el socket del cliente
-    NFServerThread(SOCKET client, SOCKET server);
+    NFServerThread(SOCKET client);
 
     // Deshabilitar el copiado y asignación para evitar problemas con threads
     NFServerThread(const NFServerThread&) = delete;

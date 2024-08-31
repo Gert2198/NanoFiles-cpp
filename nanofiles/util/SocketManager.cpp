@@ -1,12 +1,15 @@
 #include "SocketManager.hpp"
+#include <iostream>
 
 SocketManager::SocketManager(SOCKET socket) {
     this->socket = socket;
 }
 
 char SocketManager::readByte() {
-    char buffer[1];
-    recv(socket, buffer, 1, 0);
+    char buffer[1]; 
+    int result = 0;
+    result = recv(socket, buffer, 1, 0);
+    if (result == SOCKET_ERROR) std::cerr << "*Error: recv failed. Error code: " << WSAGetLastError() << std::endl;
     return buffer[0];
 }
 bool SocketManager::readBool() {

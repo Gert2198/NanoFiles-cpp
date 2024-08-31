@@ -2,11 +2,11 @@
 
 #include "util/SocketManager.hpp"
 
-void NFServerComm::serveFilesToClient(SOCKET clientSocket, SOCKET serverSocket) {
+void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
     try {
-        SocketManager serverSocketManager(serverSocket);
+        SocketManager clientSocketManager(clientSocket);
         
-        PeerMessage received = PeerMessage::readMessageFromInputStream(serverSocketManager);
+        PeerMessage received = PeerMessage::readMessageFromInputStream(clientSocketManager);
         PeerMessage messageToSend;
         
         int opcode = received.getOpcode();
@@ -17,13 +17,13 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket, SOCKET serverSocket) 
             std::vector<FileInfo> posibles = FileInfo::lookupHashSubstring(files, received.getFileHash());
             if (posibles.size() == 0) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_FILE_NOT_FOUND);
-                messageToSend.writeMessageToOutputStream(serverSocketManager); 
+                messageToSend.writeMessageToOutputStream(clientSocketManager); 
                 closesocket(clientSocket);
                 clientSocket = INVALID_SOCKET;
                 return;
             } else if (posibles.size() > 1) {
                 messageToSend = PeerMessage(PeerMessageOps::OPCODE_AMBIGUOUS_HASH);
-                messageToSend.writeMessageToOutputStream(serverSocketManager); 
+                messageToSend.writeMessageToOutputStream(clientSocketManager); 
                 closesocket(clientSocket);
                 clientSocket = INVALID_SOCKET;
                 return;
@@ -44,19 +44,19 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket, SOCKET serverSocket) 
         for (int i = 0; i < numVeces; i++) {
             std::vector<char> minipart(it, it + 32*1024 - 1);
             messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, 32*1024, minipart);
-            messageToSend.writeMessageToOutputStream(serverSocketManager); 
+            messageToSend.writeMessageToOutputStream(clientSocketManager); 
             it += 32*1024;
         }
         // ultimo mensaje con los bytes restantes por leer
         std::vector<char> minipart(it, bytes.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, bytesRestantes, minipart);
-        messageToSend.writeMessageToOutputStream(serverSocketManager); 
+        messageToSend.writeMessageToOutputStream(clientSocketManager); 
         
         // ultimo mensaje indicando que es el final
         std::string filehash = ficheroADescargar.fileHash;
         std::vector<char> vectorHash(filehash.begin(), filehash.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, true, vectorHash.size(), vectorHash);
-        messageToSend.writeMessageToOutputStream(serverSocketManager); 
+        messageToSend.writeMessageToOutputStream(clientSocketManager); 
         
         closesocket(clientSocket); 
         clientSocket = INVALID_SOCKET;

@@ -34,7 +34,7 @@ bool NFControllerLogicP2P::backgroundServeFiles() {
     int listeningPort = bgFileServer->getPort();	
     if (listeningPort > 0) {
         result = true;
-        std::cout << "NFServer server running on " + listeningPort << std::endl;
+        std::cout << "NFServer server running on port " << listeningPort << std::endl;
     } else std::cout << "*Error: Unable to start the server" << std::endl;
     return result;
 

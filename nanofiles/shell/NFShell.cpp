@@ -25,7 +25,7 @@ void NFShell::readGeneralCommand() {
 std::vector<std::string> NFShell::readGeneralCommandFromStdIn() {
     std::vector<std::string> vargs;
     while (true) {
-        std::cout << "(nanoFiles@" + NanoFiles::sharedDirname + ") ";
+        std::cout << "(nanoFiles@" << NanoFiles::sharedDirname << ") ";
         // obtenemos la línea tecleada por el usuario
         std::string input;
         std::getline(std::cin, input);

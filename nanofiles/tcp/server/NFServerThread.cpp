@@ -1,12 +1,11 @@
 #include "NFServerThread.hpp"
 
 void NFServerThread::run() {
-    NFServerComm::serveFilesToClient(clientSocket, serverSocket);
+    NFServerComm::serveFilesToClient(clientSocket);
 }
 
 // Constructor que toma el socket del cliente
-NFServerThread::NFServerThread(SOCKET client, SOCKET server) 
-    : clientSocket(client), serverSocket(server) {}
+NFServerThread::NFServerThread(SOCKET client) : clientSocket(client) {}
 
 // Permitir movimiento
 NFServerThread::NFServerThread(NFServerThread&& other) noexcept
@@ -27,4 +26,5 @@ NFServerThread& NFServerThread::operator=(NFServerThread&& other) noexcept
 
 void NFServerThread::start() {
     thread = std::thread(&NFServerThread::run, this);
+    thread.detach(); 
 }

@@ -29,7 +29,7 @@ void NFServer::run() {
         }
 
         if (clientSocket != INVALID_SOCKET) {
-            NFServerThread connectionThread(clientSocket, serverSocket->getSocket());
+            NFServerThread connectionThread(clientSocket);
             connectionThread.start();
         }
     }
