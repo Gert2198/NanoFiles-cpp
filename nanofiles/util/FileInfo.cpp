@@ -75,8 +75,13 @@ std::map<std::string, FileInfo> FileInfo::loadFileMapFromFolder(const fs::direct
 
 std::vector<char> FileInfo::readFile(const std::string& file_name) {
     std::ifstream file(file_name, std::ios::binary);
-    std::istream_iterator<char> start(file), end;
-    std::vector<char> result(start, end);
+
+    file.seekg(0, std::ios::end);
+    std::streampos fileSize = file.tellg();
+    file.seekg(0, std::ios::beg);
+    
+    std::vector<char> result(fileSize);
+    file.read(result.data(), fileSize);
     std::cout << "Read " << result.size() << " bytes" << std::endl;
     return result;
 }

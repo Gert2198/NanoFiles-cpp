@@ -144,7 +144,7 @@ void PeerMessage::writeMessageToOutputStream(SocketManager dos) { // throws IOEx
         
         dos.writeBool(last);
         dos.writeInt(length);
-        dos.write(file);
+        dos.write(file, length);
         break;
     }
     case PeerMessageOps::OPCODE_FILE_NOT_FOUND:

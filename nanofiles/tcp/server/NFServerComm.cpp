@@ -46,17 +46,20 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
             messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, 32*1024, minipart);
             messageToSend.writeMessageToOutputStream(clientSocketManager); 
             it += 32*1024;
+            std::cout << "Datagram sent: " << i+1 << std::endl;
         }
         // ultimo mensaje con los bytes restantes por leer
         std::vector<char> minipart(it, bytes.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, bytesRestantes, minipart);
         messageToSend.writeMessageToOutputStream(clientSocketManager); 
+        std::cout << "Datagram sent: " << numVeces+1 << std::endl;
         
         // ultimo mensaje indicando que es el final
         std::string filehash = ficheroADescargar.fileHash;
         std::vector<char> vectorHash(filehash.begin(), filehash.end());
         messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, true, vectorHash.size(), vectorHash);
         messageToSend.writeMessageToOutputStream(clientSocketManager); 
+        std::cout << "Last datagram sent: " << numVeces+2 << std::endl;
         
         closesocket(clientSocket); 
         clientSocket = INVALID_SOCKET;
