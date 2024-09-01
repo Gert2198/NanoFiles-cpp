@@ -89,7 +89,7 @@ PeerMessage PeerMessage::readMessageFromInputStream(SocketManager dis) { // thro
         
         char * data = new char[hashLenght];
         dis.readFully(data, hashLenght);
-        std::string hash(data);
+        std::string hash(data, hashLenght);
         delete[] data;
         
         message = PeerMessage(opcode, hashLenght, hash);
@@ -139,7 +139,8 @@ void PeerMessage::writeMessageToOutputStream(SocketManager dos) { // throws IOEx
         break;
     }
     case PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE: {
-        assert(length > 0 && length <= 32768 && file.size() == length);
+        int size = file.size();
+        assert(length > 0 && length <= 32768 && size == length);
         
         dos.writeBool(last);
         dos.writeInt(length);

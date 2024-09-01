@@ -23,15 +23,13 @@ int SocketManager::readInt() {
 void SocketManager::readFully(char* buf, int size) {
     std::vector<char> vectorBuffer(size);
     readFully(vectorBuffer, size);
-    std::copy(vectorBuffer.begin(), vectorBuffer.end(), buf);
+    std::copy(vectorBuffer.begin(), vectorBuffer.begin() + size, buf);
 }
 void SocketManager::readFully(std::vector<char>& buf, int size) {
     if (size <= MAX_SIZE) {
-        buf.resize(size);
         recv(socket, &buf[0], size, 0);
     }
     else {
-        buf.resize(MAX_SIZE);
         recv(socket, &buf[0], MAX_SIZE, 0);
         std::vector<char> otherBuf;
         readFully(otherBuf, size - MAX_SIZE);

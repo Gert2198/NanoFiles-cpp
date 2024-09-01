@@ -42,7 +42,7 @@ void NFServerComm::serveFilesToClient(SOCKET clientSocket) {
         int bytesRestantes = (int) (fichero_len % (32*1024)); 
         std::vector<char>::iterator it = bytes.begin();
         for (int i = 0; i < numVeces; i++) {
-            std::vector<char> minipart(it, it + 32*1024 - 1);
+            std::vector<char> minipart(it, it + 32*1024);
             messageToSend = PeerMessage(PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE, false, 32*1024, minipart);
             messageToSend.writeMessageToOutputStream(clientSocketManager); 
             it += 32*1024;

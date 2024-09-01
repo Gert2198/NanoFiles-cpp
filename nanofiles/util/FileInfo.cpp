@@ -74,9 +74,10 @@ std::map<std::string, FileInfo> FileInfo::loadFileMapFromFolder(const fs::direct
 }
 
 std::vector<char> FileInfo::readFile(const std::string& file_name) {
-    std::vector<char> result;
-    std::ifstream file(file_name);
-    std::copy(std::istream_iterator<char>(file), std::istream_iterator<char>(), std::back_inserter(result));
+    std::ifstream file(file_name, std::ios::binary);
+    std::istream_iterator<char> start(file), end;
+    std::vector<char> result(start, end);
+    std::cout << "Read " << result.size() << " bytes" << std::endl;
     return result;
 }
 
@@ -124,7 +125,7 @@ void FileInfo::scanFolderRecursive(const fs::directory_entry& folder, std::map<s
             std::string fileHash = FileDigest::computeFileChecksumString(filePath);
             long fileSize = entry.file_size();
             if (fileSize > 0) 
-                files.insert(std::make_pair(fileName, FileInfo(fileHash, fileName, fileSize, filePath)));
+                files.insert(std::make_pair(fileHash, FileInfo(fileHash, fileName, fileSize, filePath)));
             else {
                 // TODO: descomentar despues de crear NFShell
 
