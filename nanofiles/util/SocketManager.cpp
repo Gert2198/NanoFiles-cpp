@@ -27,7 +27,12 @@ void SocketManager::readFully(char* buf, int size) {
 }
 void SocketManager::readFully(std::vector<char>& buf, int size) {
     if (size <= MAX_SIZE) {
-        recv(socket, &buf[0], size, 0);
+        int bytesRead = 0;
+        while (bytesRead < size) {
+            int bytes = recv(socket, &buf[bytesRead], size - bytesRead, 0); 
+            bytesRead += bytes;
+        }
+        if (bytesRead != size) std::cerr << "*Error: No se han leido todos los bytes del fichero. Se han leido " << bytesRead << " bytes de " << size << std::endl;
     }
     else {
         recv(socket, &buf[0], MAX_SIZE, 0);

@@ -53,6 +53,7 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
         std::cerr << "*Error: Hash does not exist" << std::endl;
         return downloaded;
     case PeerMessageOps::OPCODE_DOWNLOAD_RESPONSE:
+        std::cout << "Datagram received: 1" << std::endl;
         end = receive.isLast();
         // file.createNewFile(); (deberia estar creado ya)
         // fichero = new RandomAccessFile(file, "rw");
@@ -69,7 +70,7 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
         return downloaded;
     }
     
-    int i = 0;
+    int i = 2;
     while (!end) {
         auto partialFile = receive.getFile();
         file.write(partialFile.data(), partialFile.size());
@@ -81,6 +82,7 @@ bool NFConnector::downloadFile(const std::string& targetFileHashSubstr, std::fst
             return downloaded;
         }
         
+        std::cout << "Datagram received: " << i << std::endl;
         end = receive.isLast();
         i++;
     }
